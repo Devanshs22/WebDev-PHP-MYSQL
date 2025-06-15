@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-if (!isset($_SESSION['username'])) {
+if (!isset($_SESSION['user_id'], $_SESSION['username'])) {
     header("Location: login.html");
     exit();
 }
@@ -9,34 +9,29 @@ if (!isset($_SESSION['username'])) {
 $servername = "localhost";
 $username = "root";
 $password = "";
-$dbname = "user_management"; 
+$dbname = "user_management";
 
 $conn = new mysqli($servername, $username, $password, $dbname);
-
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-$loggedInUsername = $_SESSION['username'];
+$userId = $_SESSION['user_id'];
 
-$sql_user = "SELECT username, email FROM users WHERE username=?";
-$stmt_user = $conn->prepare($sql_user);
-$stmt_user->bind_param("s", $loggedInUsername);
-$stmt_user->execute();
-$result_user = $stmt_user->get_result();
+$sql = "SELECT username, email, phone, dob, address FROM users WHERE id=?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $userId);
+$stmt->execute();
+$result = $stmt->get_result();
 
-if ($result_user->num_rows > 0) {
-    $user = $result_user->fetch_assoc();
-} 
-else {
-    die("Error: Logged-in user not found in database.");
-
+if ($result->num_rows > 0) {
+    $user = $result->fetch_assoc();
+} else {
+    echo "User not found.";
+    exit();
 }
 
-$sql_all_users = "SELECT username, email FROM users";
-$result_all_users = $conn->query($sql_all_users);
-
-$stmt_user->close();
+$stmt->close();
 $conn->close();
 ?>
 
@@ -44,93 +39,70 @@ $conn->close();
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+    <title>User Dashboard</title>
     <style>
         body {
             font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
             margin: 0;
-            padding: 0;
+            padding: 20px;
         }
         .container {
-            width: 80%;
-            margin: 20px auto;
-        }
-        header {
-            text-align: center;
-            padding: 10px 0;
+            max-width: 700px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 8px rgba(0,0,0,0.1);
         }
         h1, h2 {
-            margin: 0;
-            font-size: 24px;
-        }
-        .profile-info {
-            padding: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #ccc;
-        }
-        .profile-info h2 {
-            margin: 0;
-            font-size: 20px;
+            text-align: center;
         }
         .profile-info p {
             margin: 10px 0;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
-        th, td {
-            padding: 8px;
-            text-align: left;
-            border: 1px solid #ccc;
+            font-size: 16px;
         }
         .btn {
             display: inline-block;
-            padding: 5px;
-            border: 1px solid #000;
-            text-decoration: none;
-            color: #000;
+            padding: 10px 15px;
             margin-right: 10px;
-        }
-        #lgout{
+            text-decoration: none;
             color: white;
-            background-color: #FF7F7F;
-            
+            background-color: #007BFF;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+        }
+        .btn.delete {
+            background-color: #dc3545;
+        }
+        .btn:hover {
+            opacity: 0.9;
+        }
+        form {
+            display: inline;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Dashboard</h1>
-    </header>
     <div class="container">
+        <h1>Welcome, <?php echo htmlspecialchars($user['username']); ?>!</h1>
+
         <div class="profile-info">
-            <h2>Welcome, <?php echo htmlspecialchars($user['username']); ?>!</h2>
-            <p>Email: <?php echo htmlspecialchars($user['email']); ?></p>
+            <p><strong>Email:</strong> <?php echo htmlspecialchars($user['email']); ?></p>
+            <p><strong>Phone:</strong> <?php echo htmlspecialchars($user['phone']); ?></p>
+            <p><strong>Date of Birth:</strong> <?php echo htmlspecialchars($user['dob']); ?></p>
+            <p><strong>Address:</strong> <?php echo htmlspecialchars($user['address']); ?></p>
         </div>
 
-        <h2>All Users</h2>
-        <table>
-            <tr>
-                <th>Username</th>
-                <th>Email</th>
-                <th>Actions</th>
-            </tr>
-            <?php while ($row = $result_all_users->fetch_assoc()) { ?>
-            <tr>
-                <td><?php echo htmlspecialchars($row['username']); ?></td>
-                <td><?php echo htmlspecialchars($row['email']); ?></td>
-                <td>
-                    <a href="update.php?username=<?php echo urlencode($row['username']); ?>" class="btn">Edit</a>
-                    <a href="delete.php?username=<?php echo urlencode($row['username']); ?>" class="btn">Delete</a>
-                </td>
-            </tr>
-            <?php } ?>
-        </table>
+        <a href="update.php" class="btn">Edit My Profile</a>
 
-        <a href="logout.php" class="btn" id="lgout">LOGOUT</a>
+        <form action="delete.php" method="post" onsubmit="return confirm('Are you sure you want to delete your account?');">
+            <button type="submit" class="btn delete">Delete My Account</button>
+        </form>
+
+        <br><br>
+        <a href="logout.php" class="btn">Logout</a>
     </div>
 </body>
 </html>

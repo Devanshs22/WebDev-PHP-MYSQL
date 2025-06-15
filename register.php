@@ -10,20 +10,27 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-
-
-
+$phone = $_POST['phone'];
+$dob = $_POST['dob'];
+$address = $_POST['address'];
 $username = $_POST['username'];
 $email = $_POST['email'];
 $password = $_POST['password'];
+$confirm_password = $_POST['confirm_password'];
 
-if (empty($username) || empty($email) || empty($password)) {
+if (empty($phone) || empty($dob) || empty($address) || empty($username) || empty($email) || empty($password) || empty($confirm_password)) {
     echo "<p>Please fill in all fields.</p>";
     echo '<a href="register.html">Go Back to Register</a>';
     $conn->close();
     exit();
 }
 
+if ($password !== $confirm_password) {
+    echo "<p>Passwords do not match.</p>";
+    echo '<a href="register.html">Go Back to Register</a>';
+    $conn->close();
+    exit();
+}
 
 $sql_check = "SELECT * FROM users WHERE email = ? OR username = ?";
 $stmt_check = $conn->prepare($sql_check);
@@ -43,9 +50,9 @@ $stmt_check->close();
 
 $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-$sql = "INSERT INTO users (username, email, password) VALUES (?, ?, ?)";
+$sql = "INSERT INTO users (phone, dob, address, username, email, password) VALUES (?, ?, ?, ?, ?, ?)";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("sss", $username, $email, $hashed_password);
+$stmt->bind_param("ssssss", $phone, $dob, $address, $username, $email, $hashed_password);
 
 if ($stmt->execute()) {
     echo "<p>Registration successful!</p>";

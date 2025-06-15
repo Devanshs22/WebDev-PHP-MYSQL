@@ -3,9 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+
     <title>Login</title>
     <style>
+        *{
+            font-family: 'Poppins',sans-serif;
+        }
         body{
+  background: linear-gradient(135deg, #e0e7ff, #f0f4ff);
+
             display: flex;
             justify-content: center;
             align-items: center;
@@ -15,28 +22,50 @@
         }
         .container{
             width: 400px;
-            padding: 20px;
-            border: 1px solid black; 
-            border-radius: 8px; 
+            padding: 20px; 
             text-align: left;
+        }
+        .container h2 {
+            font-size: 40px;
+            text-align: center;
         }
         form{
             display: flex;
             flex-direction: column;
         }
+        label {
+            font-size: 20px;
+        }
         label, input{
-            margin-bottom: 10px;
+            margin-bottom: 5px;
             width: 100%;
             box-sizing: border-box;
+        }
+        label[for]::before {
+              content: "*";
+              color: red;
+              margin-right: 5px;
+}
+        input[type="email"],
+        input[type="password"]{
+            padding: 8px;
+            color: black;
+            border: none;
+            margin-bottom: 20px;
+            font-weight: bold;
         }
         input[type="submit"] {
             padding: 10px;
             cursor: pointer;
+            font-size: 20px;
+            margin-top: 12px;
+            font-weight: bold;
+            color: white;
             border: 1px solid #000; 
-            background-color: #f0f0f0;
+            background-color: lightgreen;
         }
         input[type="submit"]:hover {
-            background-color: #e0e0e0; 
+            background-color: green; 
         }
         a {
             display: block;
@@ -46,7 +75,7 @@
 </head>
 <body>
     <div class="container">
-        <form action="login.php" method="POST">
+        <form action="login.php" method="post">
             <h2>Login</h2>
             <label for="email">Email:</label>
             <input type="email" id="email" name="email" required>
